@@ -1,8 +1,5 @@
 FROM ubuntu:22.10
 
-ARG STEAM_USERNAME
-ARG STEAM_PASSWORD
-
 RUN apt update && \
     apt upgrade -y && \
     apt install -y \
