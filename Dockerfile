@@ -19,11 +19,14 @@ RUN addgroup \
         --ingroup steam \
         --shell /bin/sh
 
+WORKDIR /home/steam
+RUN mkdir -p ".local/share/Arma 3" && mkdir -p ".local/share/Arma 3 - Other Profiles"
+COPY ["server.Arma3Profile", ".local/share/Arma 3 - Other Profiles/"]
+COPY server.cfg .
+COPY entrypoint.sh .
+RUN chown -R steam:steam /home/steam
+
 USER steam:steam
 
-RUN mkdir -p "/home/steam/.local/share/Arma 3" && mkdir -p "/home/steam/.local/share/Arma 3 - Other Profiles"
-COPY ["server.Arma3Profile", "/home/steam/.local/share/Arma 3 - Other Profiles/"]
-COPY server.cfg /home/steam/
-COPY entrypoint.sh /home/steam
 ENTRYPOINT [ "/home/steam/entrypoint.sh" ]
 CMD [ "-name=server", "-config=/home/steam/server.cfg", "-world=empty"]
