@@ -24,8 +24,8 @@ RUN mkdir -p ".local/share/Arma 3" && mkdir -p ".local/share/Arma 3 - Other Prof
 COPY ["server.Arma3Profile", ".local/share/Arma 3 - Other Profiles/"]
 COPY server.cfg .
 COPY entrypoint.sh .
-RUN chown -R steam:steam /home/steam
-
+RUN chown -R steam:steam .
+RUN chmod +x entrypoint.sh
 USER steam:steam
 
 ENTRYPOINT [ "/home/steam/entrypoint.sh" ]
