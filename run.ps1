@@ -10,3 +10,5 @@ docker run -it -v "$(pwd)\\volumes\\Steam:/home/steam/Steam" -v "$(pwd)\\volumes
 
 
 #docker run -it -v "$(pwd)/Steam:/home/steam/Steam" -v "$(pwd)/arma3:/home/steam/Steam/arma3" --env-file=.env  -p 2302:2302/udp -p 2303:2303/udp -p 2304:2304/udp -p 2305:2305/udp -p 2306:2306/udp --user root "bdhood/arma3server:master"
+
+#docker run -it -v "data:/home/steam/Steam" --env-file=.env  -p 2302:2302/udp -p 2303:2303/udp -p 2304:2304/udp -p 2305:2305/udp -p 2306:2306/udp "bdhood/arma3server:master"
