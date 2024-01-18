@@ -1,0 +1,18 @@
+{{- if .Values.configmap.create }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.configmap.name }}
+data:
+  # https://community.bistudio.com/wiki/Arma_3:_Basic_Server_Config_File
+  basicCfg: |
+    {{ .Values.configmap.basicCfg | nindent 4 }}
+
+  # https://community.bistudio.com/wiki/Arma_3:_Server_Config_File
+  serverCfg: |
+    {{ .Values.configmap.serverCfg | nindent 4 }}
+
+  # https://community.bistudio.com/wiki/server.armaprofile
+  serverArma3Profile: |
+    {{ .Values.configmap.serverArma3Profile | nindent 4 }}
+{{- end }}

@@ -1,0 +1,143 @@
+
+configmap:
+  create: true
+  name: arma3server-config
+
+  # basic server config file
+  #   https://community.bistudio.com/wiki/Arma_3:_Basic_Server_Config_File
+  basicCfg: |
+    language="English";
+    MaxCustomFileSize = 0;
+
+  # server config file
+  #   https://community.bistudio.com/wiki/Arma_3:_Server_Config_File
+  serverCfg: |
+    hostname = "arma3server-helm";
+    motd[]= {"Welcome to my server.", "Hosted in the net."};
+    BattlEye = 1;
+    verifySignatures = 2;
+    allowedFilePatching = 0;
+    allowedLoadFileExtensions[] = { "hpp","sqs","sqf","fsm","cpp","paa","txt","xml","inc","ext","sqm","ods","fxy","lip","csv","kb","bik","bikb","html","htm","biedi" };
+    allowedPreprocessFileExtensions[] = { "hpp","sqs","sqf","fsm","cpp","paa","txt","xml","inc","ext","sqm","ods","fxy","lip","csv","kb","bik","bikb","html","htm","biedi" };
+    allowedHTMLLoadExtensions[] = { "htm","html","xml","txt" };
+    // allowedHTMLLoadURIs[] = {};
+    logFile = "server_console.log";
+    timeStampFormat = "short";
+    maxPlayers = 16;
+    missionWhitelist[] = {};
+    forcedDifficulty = "custom";
+
+  # server profile
+  #   https://community.bistudio.com/wiki/server.armaprofile
+  serverArma3Profile: |
+    class DifficultyPresets
+    {
+      class CustomDifficulty
+      {
+        class Options
+        {
+          /* Simulation */
+
+          reducedDamage = 0;		// Reduced damage
+
+          /* Situational awareness */
+
+          groupIndicators = 0;	// Group indicators (0 = never, 1 = limited distance, 2 = always)
+          friendlyTags = 0;		// Friendly name tags (0 = never, 1 = limited distance, 2 = always)
+          enemyTags = 0;			// Enemy name tags (0 = never, 1 = limited distance, 2 = always)
+          detectedMines = 0;		// Detected mines (0 = never, 1 = limited distance, 2 = always)
+          commands = 1;			// Commands (0 = never, 1 = fade out, 2 = always)
+          waypoints = 1;			// Waypoints (0 = never, 1 = fade out, 2 = always)
+          tacticalPing = 0;		// Tactical ping (0 = disable, 1 = enable)
+
+          /* Personal awareness */
+
+          weaponInfo = 2;			// Weapon info (0 = never, 1 = fade out, 2 = always)
+          stanceIndicator = 2;	// Stance indicator (0 = never, 1 = fade out, 2 = always)
+          staminaBar = 0;			// Stamina bar
+          weaponCrosshair = 0;	// Weapon crosshair
+          visionAid = 0;			// Vision aid
+
+          /* View */
+
+          thirdPersonView = 1;	// 3rd person view (0 = disabled, 1 = enabled, 2 = enabled for vehicles only (Since  Arma 3 v1.99))
+          cameraShake = 1;		// Camera shake
+
+          /* Multiplayer */
+
+          scoreTable = 1;			// Score table
+          deathMessages = 1;		// Killed by
+          vonID = 1;				// VoN ID
+
+          /* Misc */
+
+          mapContent = 0;			// Extended map content
+          autoReport = 0;			// (former autoSpot) Automatic reporting of spotted enemied by players only. This doesn't have any effect on AIs.
+          multipleSaves = 0;		// Multiple saves
+        };
+        
+        // aiLevelPreset defines AI skill level and is counted from 0 and can have following values: 0 (Low), 1 (Normal), 2 (High), 3 (Custom).
+        // when 3 (Custom) is chosen, values of skill and precision are taken from the class CustomAILevel.
+        aiLevelPreset = 3;
+      };
+
+      class CustomAILevel
+      {
+        skillAI = 0.5;
+        precisionAI = 0.5;
+      };
+    };
+
+secrets:
+  serverCredentials:
+    create: true
+    name: arma3server-server-credentials
+    password: ""
+    adminPassword: !null
+    commandPassword: !null
+  steamCredentials:
+    create: true
+    name: arma3server-steam-credentials
+    username: !null
+    password: !null
+
+statefulset:
+  create: true
+  name: arma3server
+  image: arma3server:local
+
+  labels:
+    app.kubernetes.io/name: arma3server
+
+  serverConfigMapName: arma3server-config
+  serverCredentialsSecret: arma3server-server-credentials
+  steamCredentialsSecret: arma3server-steam-credentials
+
+  args:
+  - "-name=server"
+  - "-cfg=basic.cfg"
+  - "-config=server.cfg"
+  - "-profiles=/arma3/profiles"
+
+  resources:
+    requests:
+      memory: 4Gi
+      cpu: 1
+    limits:
+      memory: 4Gi
+
+  volumeClaimSize: 16Gi
+
+service:
+  create: true
+  type: LoadBalancer
+  name: arma3server
+  labels: 
+    app.kubernetes.io/name: arma3server
+  udpPortMap:
+    # port: targetPort
+    2302: 2302
+    2303: 2303
+    2304: 2304
+    2305: 2305
+    2306: 2306

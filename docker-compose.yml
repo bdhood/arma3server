@@ -1,0 +1,22 @@
+version: "3.8"
+services:
+  arma3server:
+    build:
+      context: .
+    image: arma3server:local
+    ports:
+      - 2302:2302/udp
+      - 2303:2303/udp
+      - 2304:2304/udp
+      - 2305:2305/udp
+      - 2306:2306/udp
+    volumes:
+      - arma3:/arma3
+      - "./config/basic.cfg:/home/steam/basic.cfg:ro"
+      - "./config/server.cfg:/home/steam/server.cfg:ro"
+      - "./config/server.Arma3Profile:/home/steam/server.Arma3Profile:ro"
+    env_file:
+    - ./config/.env
+volumes:
+  arma3:
+    name: arma3

@@ -1,0 +1,98 @@
+{{- if .Values.statefulset.create }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Values.statefulset.name }}
+  {{- with .Values.statefulset.labels }}
+  labels:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  serviceName: {{ .Values.statefulset.name }}
+  replicas: 1
+  selector:
+    {{- with .Values.statefulset.labels }}
+    matchLabels:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+  template:
+    metadata:
+      {{- with .Values.statefulset.labels }}
+      labels:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      containers:
+      - name: arma3server
+        env:
+          - name: STEAM_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.statefulset.steamCredentialsSecret }}
+                key: username
+          - name: STEAM_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.statefulset.steamCredentialsSecret }}
+                key: password
+          - name: SERVER_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.statefulset.serverCredentialsSecret }}
+                key: password
+          - name: SERVER_ADMIN_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.statefulset.serverCredentialsSecret }}
+                key: adminPassword
+          - name: SERVER_COMMAND_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.statefulset.serverCredentialsSecret }}
+                key: commandPassword
+        image: {{ .Values.statefulset.image }}
+        {{- with .Values.statefulset.args }}
+        args:
+          {{- toYaml . | nindent 12 }}
+        {{- end }}
+        {{- with .Values.statefulset.resources }}
+        resources:
+          {{- toYaml . | nindent 12 }}
+        {{- end }}
+        ports:
+        {{- range untilStep 2302 2307 1 }}
+        - containerPort: {{ . }}
+          protocol: UDP
+        {{- end }}
+        volumeMounts:
+        - name: arma3-install
+          mountPath: /arma3
+        - mountPath: /home/steam/server.cfg
+          name: server-config
+          subPath: server.cfg
+        - mountPath: /home/steam/server.Arma3Profile
+          name: server-config
+          subPath: server.Arma3Profile
+        - mountPath: /home/steam/basic.cfg
+          name: server-config
+          subPath: basic.cfg
+      volumes:
+      - name: server-config
+        configMap:
+          name: {{ .Values.statefulset.serverConfigMapName }}
+          items:
+          - key: serverCfg
+            path: server.cfg
+          - key: serverArma3Profile
+            path: server.Arma3Profile
+          - key: basicCfg
+            path: basic.cfg
+  volumeClaimTemplates:
+  - metadata:
+      name: arma3-install
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: {{ .Values.statefulset.volumeClaimSize }}
+{{- end }}

@@ -1,29 +1,17 @@
-FROM ubuntu:22.10
+FROM cm2network/steamcmd:latest
+
+USER root
 
 RUN apt update && \
-    apt upgrade -y && \
-    apt install -y \
-        curl \
-        lib32gcc-s1 \
-        net-tools \
-        rename \
-        software-properties-common \
-        tmux
-RUN addgroup \
-        --system steam && \
-    adduser \
-        --system steam \
-        --ingroup steam \
-        --shell /bin/sh
+    apt install net-tools unzip -y
+RUN mkdir /arma3 && \
+    chown steam:steam /arma3 && \
+    chmod -R 0700 /arma3
 
-WORKDIR /home/steam
-RUN mkdir -p ".local/share/Arma 3" && mkdir -p ".local/share/Arma 3 - Other Profiles"
-COPY ["server.Arma3Profile", ".local/share/Arma 3 - Other Profiles/"]
-COPY server.cfg .
-COPY entrypoint.sh .
-RUN chown -R steam:steam .
-RUN chmod +x entrypoint.sh
+COPY --chown=steam:steam entrypoint.sh /home/steam
 USER steam:steam
 
+EXPOSE 2302/udp 2303/udp 2304/udp 2305/udp 2306/udp
+VOLUME ["/arma3", "/home/steam/basic.cfg", "/home/steam/server.cfg", "/home/steam/server.Arma3Profile"]
 ENTRYPOINT [ "/home/steam/entrypoint.sh" ]
-CMD [ "-name=server", "-config=/home/steam/server.cfg", "-world=empty"]
+CMD ["-name=server", "-cfg=basic.cfg", "-config=server.cfg", "-profiles=/arma3/profiles"]
